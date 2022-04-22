@@ -4,7 +4,6 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../Firebase/FirebaseConfig';
 
 const SignUp = () => {
-
     // Initialisation du Hooks useNavigate pour la redirection en fin de formulaire
     const navigate = useNavigate();
 
@@ -56,7 +55,7 @@ const SignUp = () => {
                 // réinitialisation du formulaire
                 setLoginData({ ...data });
                 // redirection vers le Link '/welcome'
-                navigate('/welcome');
+                navigate('/member');
             })
             .catch((error) => {
                 // On demande à Firebase de signaler l'erreur

@@ -27,7 +27,7 @@ const Login = () => {
             .then((user) => {
                 setEmail('');
                 setPassword('');
-                navigate('/welcome', { replace: true });
+                navigate('/member', { replace: true });
             })
             .catch((error) => {
                 setError(error);
@@ -73,10 +73,17 @@ const Login = () => {
                             {btn}
                         </form>
                         <div className='linkContainer'>
-                            <Link className='simpleLink' to='/signUp'>
+                            <div className='simpleLink'>
+                            <Link to='/signUp'>
                                 Pas encore inscrit ? Alors au préalable
                                 inscris-toi !
                             </Link>
+                            </div>
+                            <div className='simpleLink'>
+                            <Link to='/forgetpassword'>
+                                Mot de passe oublié ? C'est par ici !
+                            </Link>
+                            </div>
                         </div>
                     </div>
                 </div>
