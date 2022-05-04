@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../Firebase/FirebaseConfig';
+import { auth, user } from '../Firebase/FirebaseConfig';
+import { setDoc } from 'firebase/firestore';
 
 const SignUp = () => {
     // Initialisation du Hooks useNavigate pour la redirection en fin de formulaire
@@ -48,9 +49,15 @@ const SignUp = () => {
         e.preventDefault();
         // On récupère l'@ et mdp entrés dans le formaulaire
         const { email, password } = loginData;
-        // const auth = getAuth(); => Ici elle est omportée depuis FirebasConfig.js
+        // const auth = getAuth(); => Ici elle est importée depuis FirebaseConfig.js
         // Méthode qui instancie l'email & le mot de passe dans Firebase
         createUserWithEmailAndPassword(auth, email, password)
+            .then(authUser => {
+                return setDoc(user(authUser.user.uid), {
+                    pseudo,
+                    email
+                })
+            })
             .then((user) => {
                 // réinitialisation du formulaire
                 setLoginData({ ...data });

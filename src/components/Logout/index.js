@@ -8,7 +8,7 @@ const Logout = () => {
   const navigate = useNavigate();
 
   const [checked, setChecked] = useState(false);
-  console.log(checked)
+  // console.log(checked)
 
   useEffect (() => {
     if (checked) {
