@@ -13,40 +13,46 @@ const Member = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const listener = onAuthStateChanged(auth, user => {
+        const listener = onAuthStateChanged(auth, (user) => {
             user ? setUserSession(user) : navigate('/');
-        })
+        });
         // Si une session utilisateur existe
-        if(!!userSession) {
+        if (!!userSession) {
             // J'isole mon user grâce à son ID dans une variable
             const colRef = user(userSession.uid);
             // Je récupère les documents associés
             getDoc(colRef)
-            // Si les docs associés existent, je les isole dans une variable docData
-            // qui me sert à modifier mon state userData
-            .then(colRefData => {
-                if(colRefData.exists()) {
-                    const docData = colRefData.data();
-                    console.log(docData);
-                    console.log(colRefData.id);
-                    setUserData(docData);
-                }
-            })
-            // En cas d'erreur je l'affiche en console
-            .catch((error) => {
-                console.log(error);
-            })
+                // Si les docs associés existent, je les isole dans une variable docData
+                // qui me sert à modifier mon state userData
+                .then((colRefData) => {
+                    if (colRefData.exists()) {
+                        const docData = colRefData.data();
+                        console.log(docData);
+                        console.log(colRefData.id);
+                        setUserData(docData);
+                    }
+                })
+                // En cas d'erreur je l'affiche en console
+                .catch((error) => {
+                    console.log(error);
+                });
         }
         return listener();
     }, [userSession]);
 
-    return userSession === null ? (<>
-    <div className="loader"></div>
-    <p className="loaderText">Loading ...</p>
-    </>) : (<div className='quiz-bg'>
-            <Logout />
-            <Quiz userData={userData}/>
-        </div>);
+    return userSession === null ? (
+        <>
+            <div className='loader'></div>
+            <p className='loaderText'>Loading ...</p>
+        </>
+    ) : (
+        <div className='quiz-bg'>
+            <div className='container'>
+                <Logout />
+                <Quiz userData={userData} />
+            </div>
+        </div>
+    );
 };
 
 export default Member;
