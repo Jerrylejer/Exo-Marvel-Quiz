@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Levels from '../Levels/index';
 import ProgressBar from '../ProgressBar/index';
-import Questions from '../Questions/index.js';
 import { QuizMarvel } from '../quizMarvel/index';
 
 class Quiz extends Component {
@@ -16,12 +15,13 @@ class Quiz extends Component {
     idQuestion: 0
   }
 
+
   componentDidMount() {
     this.loadQuestions(this.state.levelNames[this.state.actualLevel])
   }
 
   loadQuestions = actualLevel => {
-    // console.log(actualLevel);
+    // Récupération du questionnaire dans une variable
     const selectedQuizLevel = QuizMarvel[0].quizz[actualLevel];
     // console.log(selectedQuizLevel);
     if(selectedQuizLevel.length === this.state.minQuestions) {
@@ -37,10 +37,11 @@ class Quiz extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    // Si le newArray n'est pas vide (càd remplie avec le quiz)
+    // Si le newArray n'est plus vide (càd remplie avec le quiz)
     if(this.state.newArray !== prevState.newArray) {
       // Je modifie le state avec ma première question et les options de réponses correspondantes
       this.setState({
+        // Je change à nouveau le state
         question: this.state.newArray[this.state.idQuestion].question,
         options: this.state.newArray[this.state.idQuestion].options
       })
@@ -53,7 +54,6 @@ class Quiz extends Component {
         <h2>Pseudo: {this.props.userData.pseudo}</h2>
         <Levels /> 
         <ProgressBar />
-        <Questions question={this.state.question} options={this.state.options}/>
       </div>
     )
   }
