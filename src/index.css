@@ -13,7 +13,7 @@
 /* HEADER */
 /* MAIN */
 /* WELCOME PAGE */
-/* TOASTIFY COLOR */
+/* 'TOASTIFY' COLOR */
 /* FOOTER */
 /* ERROR PAGE */
 /* SIGNUP - LOGIN - FORGETPASSWORD */
@@ -176,6 +176,10 @@ main {
 }
 .toastify-color {
     color: var(--white-color);
+}
+.basic {
+    width: 320px;
+    height: 100px;
 }
 /* END TOASTIFY COLOR */
 

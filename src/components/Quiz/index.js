@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import Levels from '../Levels/index';
 import ProgressBar from '../ProgressBar/index';
 import { QuizMarvel } from '../quizMarvel/index';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
+
 
 class Quiz extends Component {
     // State qui prend en compte les types et les niveaux de questionnaires
@@ -18,7 +21,28 @@ class Quiz extends Component {
         selected: null,
         score: 0,
         answer: null,
+        showWelcomeMsg: false
     };
+
+    //*** TOASTIFY ***
+    // Fonction qui prend en param le pseudo de l'utilisateur et retourne le toast configuré sur https://fkhadra.github.io/react-toastify/introduction/
+    showWelcomeMessage = pseudo => {
+        if(!this.state.showWelcomeMsg) {
+            this.setState({
+                showWelcomeMsg: true
+            })
+            toast.warn(`Welcome ${pseudo}`, {
+                position: 'top-right',
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+        }
+    };
+    //*** TOASTIFY ***
 
     componentDidMount() {
         this.loadQuestions(this.state.levelNames[this.state.actualLevel]);
@@ -36,7 +60,6 @@ class Quiz extends Component {
         // console.log(selectedQuizLevel);
 
         if (selectedQuizLevel.length === this.state.minQuestions) {
-
             //todo *** VALIDATION REPONSE ***
             this.initialArray.current = selectedQuizLevel;
             //todo *** VALIDATION REPONSE ***
@@ -64,7 +87,7 @@ class Quiz extends Component {
             }));
         }
         //todo *** VALIDATION REPONSE ***
-        
+
         const goodAnswer =
             this.initialArray.current[this.state.idQuestion].answer;
         console.log(goodAnswer);
@@ -73,6 +96,27 @@ class Quiz extends Component {
             this.setState((prevState) => ({
                 score: prevState.score + 1,
             }));
+            //*** TOASTIFY ***
+            toast.success('Bravo !', {
+                position: "top-right",
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                });
+        } else {
+            toast.error('Faux !', {
+                position: "top-right",
+                autoClose: 1000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                });
+            //*** TOASTIFY ***
         }
         //todo *** VALIDATION REPONSE ***
     };
@@ -94,9 +138,15 @@ class Quiz extends Component {
                 question: this.state.newArray[this.state.idQuestion].question,
                 options: this.state.newArray[this.state.idQuestion].options,
                 userAnswer: null,
-                btnDisabled: true
+                btnDisabled: true,
             });
         }
+        //*** TOASTIFY ***
+        // Si un pseudo est bien retourné, j'invoque la fonction showWelcomeMessage(pseudo retourné)
+        if (this.props.userData.pseudo) {
+            this.showWelcomeMessage(this.props.userData.pseudo);
+        }
+        //*** TOASTIFY ***
     }
 
     // Selection de l'option par l'utilisateur et activation du bouton de validation
@@ -127,6 +177,9 @@ class Quiz extends Component {
 
         return (
             <div>
+                //*** TOASTIFY ***
+                <ToastContainer style={{ width: "10em", fontSize: "0.5em" }}/>
+                //*** TOASTIFY ***
                 <h2>Pseudo: {this.props.userData.pseudo}</h2>
                 <Levels />
                 <ProgressBar />
