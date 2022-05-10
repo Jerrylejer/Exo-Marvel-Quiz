@@ -177,10 +177,7 @@ main {
 .toastify-color {
     color: var(--white-color);
 }
-.basic {
-    width: 320px;
-    height: 100px;
-}
+
 /* END TOASTIFY COLOR */
 
 /* FOOTER */
@@ -569,6 +566,12 @@ input:checked + .slider:before {
     color: var(--light-green-color);
     font-weight: bold;
     text-transform: uppercase;
+    font-size: 0.5em;
+}
+
+.quizRecapPara {
+    color: black;
+    font-size: 0.5em;
 }
 
 .failureMsg {
@@ -625,6 +628,7 @@ input:checked + .slider:before {
 
 .answerContainer {
     overflow-x: 'auto';
+  
 }
 
 .answers {
@@ -636,6 +640,9 @@ input:checked + .slider:before {
 .answers th {
     border: 1px solid var(--light-grey-color);
     padding: 15px;
+    color: black;
+    font-size: 0.2em;
+
 }
 
 .answers th {
@@ -645,6 +652,8 @@ input:checked + .slider:before {
     background-color: var(--red-color);
     color: var(--white-color);
     text-transform: uppercase;
+    font-size: 0.3em;
+
 }
 
 .btnInfo {

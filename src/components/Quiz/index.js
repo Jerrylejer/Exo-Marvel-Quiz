@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import Levels from '../Levels/index';
 import ProgressBar from '../ProgressBar/index';
+import QuizRecap from '../QuizRecap/index';
 import { QuizMarvel } from '../quizMarvel/index';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
-
 
 class Quiz extends Component {
     // State qui prend en compte les types et les niveaux de questionnaires
@@ -21,16 +21,17 @@ class Quiz extends Component {
         selected: null,
         score: 0,
         answer: null,
-        showWelcomeMsg: false
+        showWelcomeMsg: false,
+        quizEnd: false,
     };
 
     //*** TOASTIFY ***
     // Fonction qui prend en param le pseudo de l'utilisateur et retourne le toast configuré sur https://fkhadra.github.io/react-toastify/introduction/
-    showWelcomeMessage = pseudo => {
-        if(!this.state.showWelcomeMsg) {
+    showWelcomeMessage = (pseudo) => {
+        if (!this.state.showWelcomeMsg) {
             this.setState({
-                showWelcomeMsg: true
-            })
+                showWelcomeMsg: true,
+            });
             toast.warn(`Welcome ${pseudo}`, {
                 position: 'top-right',
                 autoClose: 1000,
@@ -80,6 +81,7 @@ class Quiz extends Component {
     nextQuestion = () => {
         if (this.state.idQuestion === this.state.minQuestions - 1) {
             // Si mon quiz est terminé, je stoppe le quiz
+            this.gameOver();
         } else {
             // S'il n'est pas terminé, je passe à la question suivante
             this.setState((prevState) => ({
@@ -98,24 +100,24 @@ class Quiz extends Component {
             }));
             //*** TOASTIFY ***
             toast.success('Bravo !', {
-                position: "top-right",
+                position: 'top-right',
                 autoClose: 1000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                });
+            });
         } else {
             toast.error('Faux !', {
-                position: "top-right",
+                position: 'top-right',
                 autoClose: 1000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
                 draggable: true,
                 progress: undefined,
-                });
+            });
             //*** TOASTIFY ***
         }
         //todo *** VALIDATION REPONSE ***
@@ -157,6 +159,12 @@ class Quiz extends Component {
         });
     };
 
+    gameOver = () => {
+        this.setState({
+            quizEnd: true,
+        });
+    };
+
     render() {
         // Itération et affichage des options de réponses
         const displayOptions = this.state.options.map((option, index) => {
@@ -175,14 +183,16 @@ class Quiz extends Component {
             );
         });
 
-        return (
-            <div>
-                //*** TOASTIFY ***
-                <ToastContainer style={{ width: "10em", fontSize: "0.5em" }}/>
-                //*** TOASTIFY ***
+        // Ternaire
+        return this.state.quizEnd ? (
+            // this.initialArray.current fonctionne de même
+            <QuizRecap ref={this.initialArray} />
+        ) : (
+            <>
+                <ToastContainer style={{ width: '10em', fontSize: '0.5em' }} />
                 <h2>Pseudo: {this.props.userData.pseudo}</h2>
                 <Levels />
-                <ProgressBar />
+                <ProgressBar idQuestion={this.state.idQuestion} minQuestions={this.state.minQuestions} />
                 <h2>Question: {this.state.question}</h2>
                 {displayOptions}
                 <button
@@ -190,9 +200,9 @@ class Quiz extends Component {
                     className='btnSubmit'
                     onClick={this.nextQuestion}
                 >
-                    Suivant
+                    {this.state.idQuestion < this.state.minQuestions-1 ? "Suivant" : "Terminer" }
                 </button>
-            </div>
+            </>
         );
     }
 }
