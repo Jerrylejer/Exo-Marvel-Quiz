@@ -23,6 +23,7 @@ class Quiz extends Component {
         answer: null,
         showWelcomeMsg: false,
         quizEnd: false,
+        percent: 0,
     };
 
     //*** TOASTIFY ***
@@ -159,11 +160,32 @@ class Quiz extends Component {
         });
     };
 
+    getPercentage = (totalQuestions, scoreUtilisateur) =>
+        (scoreUtilisateur * 100) / totalQuestions;
+
     gameOver = () => {
-        this.setState({
-            quizEnd: true,
-        });
+        const recapPercentage = this.getPercentage(
+            this.state.minQuestions,
+            this.state.score
+        );
+
+        if (recapPercentage >= 50) {
+            this.setState({
+                actualLevel: this.state.actualLevel + 1,
+                percent: recapPercentage,
+                quizEnd: true,
+            });
+        } else {
+            this.setState({
+                percent: recapPercentage,
+                quizEnd: true,
+            });
+        }
     };
+
+    loadLevelQuestions = param => {
+
+    }
 
     render() {
         // Itération et affichage des options de réponses
@@ -186,13 +208,24 @@ class Quiz extends Component {
         // Ternaire
         return this.state.quizEnd ? (
             // this.initialArray.current fonctionne de même
-            <QuizRecap ref={this.initialArray} />
+            <QuizRecap
+                ref={this.initialArray}
+                levelNames={this.state.levelNames}
+                percent={this.state.percent}
+                score={this.state.score}
+                minQuestions={this.state.minQuestions}
+                actualLevel={this.state.actualLevel}
+                loadLevelQuestions={this.loadLevelQuestions}
+            />
         ) : (
             <>
                 <ToastContainer style={{ width: '10em', fontSize: '0.5em' }} />
                 <h2>Pseudo: {this.props.userData.pseudo}</h2>
                 <Levels />
-                <ProgressBar idQuestion={this.state.idQuestion} minQuestions={this.state.minQuestions} />
+                <ProgressBar
+                    idQuestion={this.state.idQuestion}
+                    minQuestions={this.state.minQuestions}
+                />
                 <h2>Question: {this.state.question}</h2>
                 {displayOptions}
                 <button
@@ -200,7 +233,9 @@ class Quiz extends Component {
                     className='btnSubmit'
                     onClick={this.nextQuestion}
                 >
-                    {this.state.idQuestion < this.state.minQuestions-1 ? "Suivant" : "Terminer" }
+                    {this.state.idQuestion < this.state.minQuestions - 1
+                        ? 'Suivant'
+                        : 'Terminer'}
                 </button>
             </>
         );
