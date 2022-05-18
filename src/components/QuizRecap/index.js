@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { GiChampions } from "react-icons/gi";
 
 const QuizRecap = React.forwardRef((props, ref) => {
-    const { levelNames, actualLevel, score, percent, minQuestions, loadLevelQuestions } = props;
+    const {
+        levelNames,
+        actualLevel,
+        score,
+        percent,
+        minQuestions,
+        loadLevelQuestions,
+    } = props;
     // console.log(ref);
     //* RECUPERATION DU REF ET CHARGEMENT DU STATE
     const [quiz, setQuiz] = useState([]);
@@ -14,42 +22,55 @@ const QuizRecap = React.forwardRef((props, ref) => {
 
     const mediumScore = minQuestions / 2;
 
-    const displayQuiz =
+    // Retour au Quiz en cours si score < mediumScore
+    if(score < mediumScore) {
+        setTimeout(() => {
+            loadLevelQuestions(actualLevel);
+        }, 3000)
+    }
+
+    const displayRecapMsg =
         score >= mediumScore ? (
             /* SI LA MOYENNE EST ATTEINTE */
             <>
-             <div className='stepsBtnContainer'>
-                {actualLevel < levelNames.length ? (
-                            <>
-                                {/* S'IL RESTE DES QUIZ A CHARGER */}
-                                <p className='successMsg'>
-                                    Passez au niveau suivant !
-                                </p>
-                                <button className='btnResult success' onClick={loadLevelQuestions}>
-                                    Niveau suivant
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                {/* SI ON EST DEJA AU LEVEL EXPERT */}
-                                <p className='successMsg'>
-                                    Bravo, vous êtes un expert !
-                                </p>
-                                <button className='btnResult gameOver' onClick={loadLevelQuestions}>
-                                    Accueil
-                                </button>
-                            </>
-                        )}
-                        {/* AFFICHAGE SANS CONDITION DU % ET SCORE */}
-                        <div className='percentage'>
-                            <div className='progressPercent'>
-                                Réussite: {percent}%
-                            </div>
-                            <div className='progressPercent'>
-                                Note: {score}/{minQuestions}
-                            </div>
+                <div className='stepsBtnContainer'>
+                    {actualLevel < levelNames.length ? (
+                        <>
+                            {/* S'IL RESTE DES QUIZ A CHARGER */}
+                            <p className='successMsg'>
+                                Passez au niveau suivant !
+                            </p>
+                            <button
+                                className='btnResult success'
+                                onClick={() => loadLevelQuestions(actualLevel)}
+                            >
+                                Niveau suivant
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            {/* SI ON EST DEJA AU LEVEL EXPERT */}
+                            <p className='successMsg'>
+                                <GiChampions size='1.5em'/> Bravo, vous êtes un expert !
+                            </p>
+                            <button
+                                className='btnResult gameOver'
+                                onClick={() => loadLevelQuestions(0)}
+                            >
+                                Accueil
+                            </button>
+                        </>
+                    )}
+                    {/* AFFICHAGE SANS CONDITION DU % ET SCORE */}
+                    <div className='percentage'>
+                        <div className='progressPercent'>
+                            Réussite: {percent}%
                         </div>
-             </div>
+                        <div className='progressPercent'>
+                            Note: {score}/{minQuestions}
+                        </div>
+                    </div>
+                </div>
             </>
         ) : (
             /* SI LA MOYENNE N'EST PAS ATTEINTE */
@@ -66,9 +87,12 @@ const QuizRecap = React.forwardRef((props, ref) => {
                     </div>
                 </div>
                 <div>
-                <button className='btnResult gameOver'onClick={loadLevelQuestions}>
-                                    Accueil
-                                </button>
+                    <button
+                        className='btnResult gameOver'
+                        onClick={loadLevelQuestions}
+                    >
+                        Accueil
+                    </button>
                 </div>
             </>
         );
@@ -89,11 +113,13 @@ const QuizRecap = React.forwardRef((props, ref) => {
 
     return (
         <>
-            {displayQuiz}
+            {displayRecapMsg}
             <hr />
             {score >= mediumScore ? (
                 <>
-                 <p className='quizRecapPara'>Les réponses aux questions posées :</p>
+                    <p className='quizRecapPara'>
+                        Les réponses aux questions posées :
+                    </p>
                     <div className='answerContainer'>
                         <table className='answers'>
                             <thead>
@@ -107,9 +133,7 @@ const QuizRecap = React.forwardRef((props, ref) => {
                         </table>
                     </div>
                 </>
-            ) : (
-                null
-            )}
+            ) :  (<div className="loader"></div>)}
         </>
     );
 });

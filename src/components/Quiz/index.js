@@ -4,27 +4,34 @@ import ProgressBar from '../ProgressBar/index';
 import QuizRecap from '../QuizRecap/index';
 import { QuizMarvel } from '../quizMarvel/index';
 import { ToastContainer, toast } from 'react-toastify';
+import { FaChevronRight } from 'react-icons/fa';
 import 'react-toastify/dist/ReactToastify.min.css';
 
+
 class Quiz extends Component {
-    // State qui prend en compte les types et les niveaux de questionnaires
-    state = {
-        levelNames: ['debutant', 'confirme', 'expert'],
-        actualLevel: 0,
-        minQuestions: 10,
-        newArray: [],
-        question: null,
-        options: [],
-        idQuestion: 0,
-        btnDisabled: true,
-        userAnswer: null,
-        selected: null,
-        score: 0,
-        answer: null,
-        showWelcomeMsg: false,
-        quizEnd: false,
-        percent: 0,
-    };
+    constructor(props) {
+        super(props);
+        // State qui prend en compte les types et les niveaux de questionnaires
+        this.initialState = {
+            levelNames: ['debutant', 'confirme', 'expert'],
+            actualLevel: 0,
+            minQuestions: 10,
+            newArray: [],
+            question: null,
+            options: [],
+            idQuestion: 0,
+            btnDisabled: true,
+            userAnswer: null,
+            selected: null,
+            score: 0,
+            answer: null,
+            showWelcomeMsg: false,
+            quizEnd: false,
+            percent: 0,
+        };
+
+        this.state = this.initialState;
+    }
 
     //*** TOASTIFY ***
     // Fonction qui prend en param le pseudo de l'utilisateur et retourne le toast configuré sur https://fkhadra.github.io/react-toastify/introduction/
@@ -82,7 +89,10 @@ class Quiz extends Component {
     nextQuestion = () => {
         if (this.state.idQuestion === this.state.minQuestions - 1) {
             // Si mon quiz est terminé, je stoppe le quiz
-            this.gameOver();
+            // this.gameOver()
+            this.setState({
+                quizEnd: true
+            })
         } else {
             // S'il n'est pas terminé, je passe à la question suivante
             this.setState((prevState) => ({
@@ -144,9 +154,20 @@ class Quiz extends Component {
                 btnDisabled: true,
             });
         }
+
+        if (this.state.quizEnd !== prevState.quizEnd) {
+            // On vérifie le bon changement du score
+            // console.log(this.state.score)
+            const recapPercentage = this.getPercentage(
+                this.state.minQuestions,
+                this.state.score
+            );
+            this.gameOver(recapPercentage);
+        }
+
         //*** TOASTIFY ***
         // Si un pseudo est bien retourné, j'invoque la fonction showWelcomeMessage(pseudo retourné)
-        if (this.props.userData.pseudo) {
+        if (this.props.userData.pseudo !== prevProps.userData.pseudo ) {
             this.showWelcomeMessage(this.props.userData.pseudo);
         }
         //*** TOASTIFY ***
@@ -163,29 +184,26 @@ class Quiz extends Component {
     getPercentage = (totalQuestions, scoreUtilisateur) =>
         (scoreUtilisateur * 100) / totalQuestions;
 
-    gameOver = () => {
-        const recapPercentage = this.getPercentage(
-            this.state.minQuestions,
-            this.state.score
-        );
+    gameOver = percent => {
 
-        if (recapPercentage >= 50) {
+        if (percent >= 50) {
             this.setState({
                 actualLevel: this.state.actualLevel + 1,
-                percent: recapPercentage,
-                quizEnd: true,
+                percent,
             });
         } else {
             this.setState({
-                percent: recapPercentage,
-                quizEnd: true,
+                percent,
             });
         }
     };
 
-    loadLevelQuestions = param => {
-
-    }
+    loadLevelQuestions = (param) => {
+        // Mise à jour du initialState dont seul la propriété actualLevel est modifiée
+        this.setState({...this.initialState, actualLevel: param});
+        // Mise à jour de la fonction loadQuestions
+        this.loadQuestions(this.state.levelNames[param])
+    };
 
     render() {
         // Itération et affichage des options de réponses
@@ -200,7 +218,7 @@ class Quiz extends Component {
                     }`}
                     onClick={() => this.optionValidation(option)}
                 >
-                    {option}
+                   <FaChevronRight /> {option}
                 </p>
             );
         });
@@ -221,7 +239,7 @@ class Quiz extends Component {
             <>
                 <ToastContainer style={{ width: '10em', fontSize: '0.5em' }} />
                 <h2>Pseudo: {this.props.userData.pseudo}</h2>
-                <Levels />
+                <Levels levelNames={this.state.levelNames} actualLevel={this.state.actualLevel} />
                 <ProgressBar
                     idQuestion={this.state.idQuestion}
                     minQuestions={this.state.minQuestions}
