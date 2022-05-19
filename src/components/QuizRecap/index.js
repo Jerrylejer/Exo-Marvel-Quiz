@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { GiChampions } from "react-icons/gi";
+import Loader from '../Loader/index';
+import Modal from '../Modal';
+import { GiChampions } from 'react-icons/gi';
 
 const QuizRecap = React.forwardRef((props, ref) => {
     const {
@@ -20,13 +22,25 @@ const QuizRecap = React.forwardRef((props, ref) => {
     }, [ref]);
     //* RECUPERATION DU REF ET CHARGEMENT DU STATE
 
+    //* MODAL API
+    const [openModal, setOpenModal] = useState(false);
+
+    const showModal = (id) => {
+        setOpenModal(true);
+    };
+
+    const closeModal = () => {
+        setOpenModal(false);
+    };
+    //* MODAL API
+
     const mediumScore = minQuestions / 2;
 
     // Retour au Quiz en cours si score < mediumScore
-    if(score < mediumScore) {
+    if (score < mediumScore) {
         setTimeout(() => {
             loadLevelQuestions(actualLevel);
-        }, 3000)
+        }, 3000);
     }
 
     const displayRecapMsg =
@@ -51,7 +65,8 @@ const QuizRecap = React.forwardRef((props, ref) => {
                         <>
                             {/* SI ON EST DEJA AU LEVEL EXPERT */}
                             <p className='successMsg'>
-                                <GiChampions size='1.5em'/> Bravo, vous êtes un expert !
+                                <GiChampions size='1.5em' /> Bravo, vous êtes un
+                                expert !
                             </p>
                             <button
                                 className='btnResult gameOver'
@@ -104,7 +119,12 @@ const QuizRecap = React.forwardRef((props, ref) => {
                 <td>{question.question}</td>
                 <td>{question.answer}</td>
                 <td>
-                    <button className='btnInfo'>Infos</button>
+                    <button
+                        className='btnInfo'
+                        onClick={() => showModal(question.heroId)}
+                    >
+                        Infos
+                    </button>
                 </td>
             </tr>
         );
@@ -133,7 +153,20 @@ const QuizRecap = React.forwardRef((props, ref) => {
                         </table>
                     </div>
                 </>
-            ) :  (<div className="loader"></div>)}
+            ) : (
+                <Loader />
+            )}
+            <Modal showModal={openModal} closeModal={closeModal}>
+                <div className='modalHeader'>
+                    <h2>Titre 1</h2>
+                </div>
+                <div className='modalBody'>
+                    <h3>Titre 2</h3>
+                </div>
+                <div className='modalFooter'>
+                    <button className='modalBtn'>Fermer</button>
+                </div>
+            </Modal>
         </>
     );
 });

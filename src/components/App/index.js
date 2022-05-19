@@ -13,7 +13,7 @@ import { IconContext } from 'react-icons';
 function App() {
     return (
         // h1 à changer pour une div => Erreurs de taille sur toute la spa
-        <h1>
+        <>
             <IconContext.Provider value={{ style: { verticalAlign: 'middle' } }}>
                 <Header />
                 <Routes>
@@ -26,7 +26,7 @@ function App() {
                 </Routes>
                 <Footer />
             </IconContext.Provider>
-        </h1>
+        </>
     );
 }
 

@@ -7,39 +7,40 @@ import { ToastContainer, toast } from 'react-toastify';
 import { FaChevronRight } from 'react-icons/fa';
 import 'react-toastify/dist/ReactToastify.min.css';
 
+// States entrainant une modification de rendu
+const initialState = {
+    actualLevel: 0,
+    minQuestions: 10,
+    newArray: [],
+    question: null,
+    options: [],
+    idQuestion: 0,
+    btnDisabled: true,
+    userAnswer: null,
+    selected: null,
+    score: 0,
+    answer: null,
+    showWelcomeMsg: false,
+    quizEnd: false,
+    percent: 0,
+};
+
+// Anciens states qui n'entrainent pas de modification de rendu
+const levelNames = ['debutant', 'confirme', 'expert'];
 
 class Quiz extends Component {
     constructor(props) {
         super(props);
-        // State qui prend en compte les types et les niveaux de questionnaires
-        this.initialState = {
-            levelNames: ['debutant', 'confirme', 'expert'],
-            actualLevel: 0,
-            minQuestions: 10,
-            newArray: [],
-            question: null,
-            options: [],
-            idQuestion: 0,
-            btnDisabled: true,
-            userAnswer: null,
-            selected: null,
-            score: 0,
-            answer: null,
-            showWelcomeMsg: false,
-            quizEnd: false,
-            percent: 0,
-        };
-
-        this.state = this.initialState;
+        this.state = initialState;
     }
 
     //*** TOASTIFY ***
     // Fonction qui prend en param le pseudo de l'utilisateur et retourne le toast configuré sur https://fkhadra.github.io/react-toastify/introduction/
     showWelcomeMessage = (pseudo) => {
-        if (!this.state.showWelcomeMsg) {
-            this.setState({
-                showWelcomeMsg: true,
-            });
+        const { showWelcomeMsg } = this.state;
+
+        if (!showWelcomeMsg) {
+            this.setState({ showWelcomeMsg: true });
             toast.warn(`Welcome ${pseudo}`, {
                 position: 'top-right',
                 autoClose: 1000,
@@ -54,7 +55,9 @@ class Quiz extends Component {
     //*** TOASTIFY ***
 
     componentDidMount() {
-        this.loadQuestions(this.state.levelNames[this.state.actualLevel]);
+        const { actualLevel } = this.state;
+
+        this.loadQuestions(levelNames[actualLevel]);
     }
 
     // Je récupère le tableau initial incluant la réponse à la question (pas récupérable autrement)
@@ -64,35 +67,32 @@ class Quiz extends Component {
     //todo *** VALIDATION REPONSE ***
 
     loadQuestions = (actualLevel) => {
+        const { minQuestions } = this.state;
+
         // Récupération du questionnaire dans une variable
         const selectedQuizLevel = QuizMarvel[0].quizz[actualLevel];
         // console.log(selectedQuizLevel);
 
-        if (selectedQuizLevel.length === this.state.minQuestions) {
+        if (selectedQuizLevel.length === minQuestions) {
             //todo *** VALIDATION REPONSE ***
             this.initialArray.current = selectedQuizLevel;
             //todo *** VALIDATION REPONSE ***
-
             // Ici un nouveau tableau exempt des réponses pour la non visibilité dans React DevTools
             const newQuizWithoutAnswer = selectedQuizLevel.map(
                 ({ answer, ...keepRest }) => keepRest
             );
             // J'alimente mon state avec le nouveau tableau de données
-            this.setState({
-                newArray: newQuizWithoutAnswer,
-            });
-        } else {
-            console.log('Pas assez de questions');
+            this.setState({ newArray: newQuizWithoutAnswer });
         }
     };
 
     nextQuestion = () => {
-        if (this.state.idQuestion === this.state.minQuestions - 1) {
+        const { minQuestions, idQuestion, userAnswer } = this.state;
+
+        if (idQuestion === minQuestions - 1) {
             // Si mon quiz est terminé, je stoppe le quiz
             // this.gameOver()
-            this.setState({
-                quizEnd: true
-            })
+            this.setState({ quizEnd: true });
         } else {
             // S'il n'est pas terminé, je passe à la question suivante
             this.setState((prevState) => ({
@@ -101,11 +101,10 @@ class Quiz extends Component {
         }
         //todo *** VALIDATION REPONSE ***
 
-        const goodAnswer =
-            this.initialArray.current[this.state.idQuestion].answer;
-        console.log(goodAnswer);
+        const goodAnswer = this.initialArray.current[idQuestion].answer;
+        // console.log(goodAnswer);
 
-        if (this.state.userAnswer === goodAnswer) {
+        if (userAnswer === goodAnswer) {
             this.setState((prevState) => ({
                 score: prevState.score + 1,
             }));
@@ -135,39 +134,39 @@ class Quiz extends Component {
     };
 
     componentDidUpdate(prevProps, prevState) {
+        const { minQuestions, newArray, idQuestion, score, quizEnd } =
+            this.state;
+
         // Si le newArray n'est plus vide (càd remplie avec le quiz)
-        if (this.state.newArray !== prevState.newArray) {
+        if (newArray !== prevState.newArray) {
             // Je modifie le state avec ma première question et les options de réponses correspondantes
             this.setState({
                 // Je change à nouveau le state et récupère la question et les options de newArray[0] (1ere question)
-                question: this.state.newArray[this.state.idQuestion].question,
-                options: this.state.newArray[this.state.idQuestion].options,
+                question: newArray[idQuestion].question,
+                options: newArray[idQuestion].options,
             });
         }
         // Je récupère ici la question suivante et les options de réponses associées
-        if (this.state.idQuestion !== prevState.idQuestion) {
+        if (idQuestion !== prevState.idQuestion) {
             this.setState({
                 // Je change à nouveau le state et récupère la question et les options de newArray[0] (1ere question)
-                question: this.state.newArray[this.state.idQuestion].question,
-                options: this.state.newArray[this.state.idQuestion].options,
+                question: newArray[idQuestion].question,
+                options: newArray[idQuestion].options,
                 userAnswer: null,
                 btnDisabled: true,
             });
         }
 
-        if (this.state.quizEnd !== prevState.quizEnd) {
+        if (quizEnd !== prevState.quizEnd) {
             // On vérifie le bon changement du score
             // console.log(this.state.score)
-            const recapPercentage = this.getPercentage(
-                this.state.minQuestions,
-                this.state.score
-            );
+            const recapPercentage = this.getPercentage(minQuestions, score);
             this.gameOver(recapPercentage);
         }
 
         //*** TOASTIFY ***
         // Si un pseudo est bien retourné, j'invoque la fonction showWelcomeMessage(pseudo retourné)
-        if (this.props.userData.pseudo !== prevProps.userData.pseudo ) {
+        if (this.props.userData.pseudo !== prevProps.userData.pseudo) {
             this.showWelcomeMessage(this.props.userData.pseudo);
         }
         //*** TOASTIFY ***
@@ -184,11 +183,12 @@ class Quiz extends Component {
     getPercentage = (totalQuestions, scoreUtilisateur) =>
         (scoreUtilisateur * 100) / totalQuestions;
 
-    gameOver = percent => {
+    gameOver = (percent) => {
+        const { actualLevel } = this.state;
 
         if (percent >= 50) {
             this.setState({
-                actualLevel: this.state.actualLevel + 1,
+                actualLevel: actualLevel + 1,
                 percent,
             });
         } else {
@@ -200,60 +200,71 @@ class Quiz extends Component {
 
     loadLevelQuestions = (param) => {
         // Mise à jour du initialState dont seul la propriété actualLevel est modifiée
-        this.setState({...this.initialState, actualLevel: param});
+        this.setState({ ...initialState, actualLevel: param });
         // Mise à jour de la fonction loadQuestions
-        this.loadQuestions(this.state.levelNames[param])
+        this.loadQuestions(levelNames[param]);
     };
 
     render() {
+        const {
+            actualLevel,
+            minQuestions,
+            question,
+            options,
+            idQuestion,
+            btnDisabled,
+            userAnswer,
+            score,
+            quizEnd,
+            percent,
+        } = this.state;
+
         // Itération et affichage des options de réponses
-        const displayOptions = this.state.options.map((option, index) => {
+        const displayOptions = options.map((option, index) => {
             return (
                 <p
                     key={index}
                     // L'option de réponse cliquée par l'utilisateur est bien cette option itérée ?
                     // J'isole l'option cliquée avec le CSS 'selected'
                     className={`answerOptions ${
-                        this.state.userAnswer === option ? 'selected' : null
+                        userAnswer === option ? 'selected' : null
                     }`}
                     onClick={() => this.optionValidation(option)}
                 >
-                   <FaChevronRight /> {option}
+                    <FaChevronRight /> {option}
                 </p>
             );
         });
 
         // Ternaire
-        return this.state.quizEnd ? (
+        return quizEnd ? (
             // this.initialArray.current fonctionne de même
             <QuizRecap
                 ref={this.initialArray}
-                levelNames={this.state.levelNames}
-                percent={this.state.percent}
-                score={this.state.score}
-                minQuestions={this.state.minQuestions}
-                actualLevel={this.state.actualLevel}
+                levelNames={levelNames}
+                percent={percent}
+                score={score}
+                minQuestions={minQuestions}
+                actualLevel={actualLevel}
                 loadLevelQuestions={this.loadLevelQuestions}
             />
         ) : (
             <>
-                <ToastContainer style={{ width: '10em', fontSize: '0.5em' }} />
+                <ToastContainer />
                 <h2>Pseudo: {this.props.userData.pseudo}</h2>
-                <Levels levelNames={this.state.levelNames} actualLevel={this.state.actualLevel} />
+                <Levels levelNames={levelNames} actualLevel={actualLevel} />
                 <ProgressBar
-                    idQuestion={this.state.idQuestion}
-                    minQuestions={this.state.minQuestions}
+                    idQuestion={idQuestion}
+                    minQuestions={minQuestions}
                 />
-                <h2>Question: {this.state.question}</h2>
+                <h2>Question: {question}</h2>
                 {displayOptions}
                 <button
-                    disabled={this.state.btnDisabled}
+                    disabled={btnDisabled}
                     className='btnSubmit'
                     onClick={this.nextQuestion}
                 >
-                    {this.state.idQuestion < this.state.minQuestions - 1
-                        ? 'Suivant'
-                        : 'Terminer'}
+                    {idQuestion < minQuestions - 1 ? 'Suivant' : 'Terminer'}
                 </button>
             </>
         );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Loader from '../Loader';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, user } from '../Firebase/FirebaseConfig';
@@ -42,7 +43,7 @@ const Member = () => {
 
     return userSession === null ? (
         <>
-            <div className='loader'></div>
+            <Loader />
             <p className='loaderText'>Loading ...</p>
         </>
     ) : (
