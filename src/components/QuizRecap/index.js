@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Loader from '../Loader/index';
 import Modal from '../Modal';
+import axios from 'axios';
 import { GiChampions } from 'react-icons/gi';
 
 const QuizRecap = React.forwardRef((props, ref) => {
@@ -13,26 +14,47 @@ const QuizRecap = React.forwardRef((props, ref) => {
         loadLevelQuestions,
     } = props;
     // console.log(ref);
-    //* RECUPERATION DU REF ET CHARGEMENT DU STATE
+    //TODO RECUPERATION DU REF ET CHARGEMENT DU STATE
     const [quiz, setQuiz] = useState([]);
 
     useEffect(() => {
         setQuiz(ref.current);
         // console.log(ref.current)
     }, [ref]);
-    //* RECUPERATION DU REF ET CHARGEMENT DU STATE
+    //TODO RECUPERATION DU REF ET CHARGEMENT DU STATE
 
-    //* MODAL API
+    //TODO DONNEES API
+    const API_PUBLIC_KEY = process.env.REACT_APP_MARVEL_API_KEY;
+    const hash = '886e2657306be079bbbfa1e5e50d3a78';
+    console.log(API_PUBLIC_KEY);
+    //TODO DONNEES API
+
+    //TODO MODAL API
     const [openModal, setOpenModal] = useState(false);
-
+    const [displayCharacterInfo, setDisplayCharacterInfo] = useState([]);
+    const [loading, setLoading] = useState(true);
     const showModal = (id) => {
         setOpenModal(true);
+        axios
+            .get(
+                `https://gateway.marvel.com/v1/public/characters/${id}?ts-1&apikey=${API_PUBLIC_KEY}&hash=${hash}`
+            )
+            .then((response) => {
+                // On charge le state avec les données de l'api
+                setDisplayCharacterInfo(response.data);
+                // On arrête le loader
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
     };
-
     const closeModal = () => {
         setOpenModal(false);
+        setLoading(true);
+        setDisplayCharacterInfo([]);
     };
-    //* MODAL API
+    //TODO MODAL API
 
     const mediumScore = minQuestions / 2;
 
@@ -131,6 +153,29 @@ const QuizRecap = React.forwardRef((props, ref) => {
     });
     // TODO DISPATCH DES DONNEES DU QUIZ
 
+    const displayResultsInModal = !loading ? (
+        <>
+            <div className='modalHeader'>
+                <h2>{displayCharacterInfo.data.results[0].name}</h2>
+            </div>
+            <div className='modalBody'>
+                <h3>Titre 2</h3>
+            </div>
+            <div className='modalFooter'>
+                <button className='modalBtn'>Fermer</button>
+            </div>
+        </>
+    ) : (
+        <>
+            <div className='modalHeader'>
+                <h2>Réponse de Marvel en réception ...</h2>
+            </div>
+            <div className='modalBody'>
+                <Loader />
+            </div>
+        </>
+    );
+
     return (
         <>
             {displayRecapMsg}
@@ -157,15 +202,7 @@ const QuizRecap = React.forwardRef((props, ref) => {
                 <Loader />
             )}
             <Modal showModal={openModal} closeModal={closeModal}>
-                <div className='modalHeader'>
-                    <h2>Titre 1</h2>
-                </div>
-                <div className='modalBody'>
-                    <h3>Titre 2</h3>
-                </div>
-                <div className='modalFooter'>
-                    <button className='modalBtn'>Fermer</button>
-                </div>
+                {displayResultsInModal}
             </Modal>
         </>
     );
