@@ -20,7 +20,30 @@ const QuizRecap = React.forwardRef((props, ref) => {
     useEffect(() => {
         setQuiz(ref.current);
         // console.log(ref.current)
+        // Vérification de la date de validité des infos précédemment chargées
+        if (localStorage.getItem('marvelStorageDate')) {
+            // On appelle une fonction qui se charge de la vérification
+            const date = localStorage.getItem('marvelStorageDate');
+            checkDataExpiration(date);
+        }
     }, [ref]);
+
+    const checkDataExpiration = (date) => {
+        // Encpsulation de la date d'aujourd'hui pour comparaison
+        const today = Date.now();
+        // Différence entre les deux
+        const timeDifference = today - date;
+        // Convertion du time en days
+        const dayDifference = timeDifference / (1000 * 3600 * 24);
+        // condition
+        if (dayDifference >= 15) {
+            // On supprime toutes les données
+            localStorage.clear();
+            // Mise en place de la nouvelle date
+            localStorage.setItem('marvelStorageDate', Date.now());
+        }
+    };
+
     //TODO RECUPERATION DU REF ET CHARGEMENT DU STATE
 
     //TODO DONNEES API
@@ -35,25 +58,46 @@ const QuizRecap = React.forwardRef((props, ref) => {
     const [loading, setLoading] = useState(true);
     const showModal = (id) => {
         setOpenModal(true);
-        axios
-            .get(
-                `https://gateway.marvel.com/v1/public/characters/${id}?ts-1&apikey=${API_PUBLIC_KEY}&hash=${hash}`
-            )
-            .then((response) => {
-                // On charge le state avec les données de l'api
-                setDisplayCharacterInfo(response.data);
-                // On arrête le loader
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.log(error);
-            });
+
+        if (localStorage.getItem(id)) {
+            // Si les données sont déjà chargées => On charge depuis le LS
+            setDisplayCharacterInfo(JSON.parse(localStorage.getItem(id)));
+            // On arrête le loader
+            setLoading(false);
+        } else {
+            // Si les données n'existent pas => On charge depuis la requête Api
+            axios
+                .get(
+                    `https://gateway.marvel.com/v1/public/characters/${id}?ts-1&apikey=${API_PUBLIC_KEY}&hash=${hash}`
+                )
+                .then((response) => {
+                    // On charge le state avec les données de l'api
+                    setDisplayCharacterInfo(response.data);
+                    console.log(response);
+                    // On arrête le loader
+                    setLoading(false);
+                    // On initialise le second stockage de cette réponse dans le LS Key-Value
+                    localStorage.setItem(id, JSON.stringify(response.data));
+                    // Setup de la date si pas d'info déjà chargée
+                    if (!localStorage.getItem('marvelStorageDate')) {
+                        localStorage.setItem('marvelStorageDate', Date.now());
+                    }
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
     };
     const closeModal = () => {
         setOpenModal(false);
         setLoading(true);
         setDisplayCharacterInfo([]);
     };
+
+    const capitalizeFirstLetter = (string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+
     //TODO MODAL API
 
     const mediumScore = minQuestions / 2;
@@ -159,10 +203,50 @@ const QuizRecap = React.forwardRef((props, ref) => {
                 <h2>{displayCharacterInfo.data.results[0].name}</h2>
             </div>
             <div className='modalBody'>
-                <h3>Titre 2</h3>
+                <div className='comicImage'>
+                    <img
+                        src={
+                            displayCharacterInfo.data.results[0].thumbnail
+                                .path +
+                            '.' +
+                            displayCharacterInfo.data.results[0].thumbnail
+                                .extension
+                        }
+                        alt={displayCharacterInfo.data.results[0].name}
+                    />
+                    <p>{displayCharacterInfo.attributionText}</p>
+                </div>
+                <div className='comicDetails'>
+                    <h3>Description</h3>
+                    {displayCharacterInfo.data.results[0].description ? (
+                        <p>
+                            {displayCharacterInfo.data.results[0].description}
+                        </p>
+                    ) : (
+                        <p>Description indisponible pour le moment</p>
+                    )}
+                    <h3>Plus d'infos</h3>
+                    {displayCharacterInfo.data.results[0].urls &&
+                        displayCharacterInfo.data.results[0].urls.map(
+                            (url, index) => {
+                                return (
+                                    <a
+                                        key={index}
+                                        href={url.url}
+                                        target='_blank'
+                                        rel='noopener noreferrer'
+                                    >
+                                        {capitalizeFirstLetter(url.type)}
+                                    </a>
+                                );
+                            }
+                        )}
+                </div>
             </div>
             <div className='modalFooter'>
-                <button className='modalBtn'>Fermer</button>
+                <button className='modalBtn' onClick={closeModal}>
+                    Fermer
+                </button>
             </div>
         </>
     ) : (

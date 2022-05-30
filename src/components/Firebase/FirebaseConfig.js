@@ -1,22 +1,21 @@
-import { initializeApp} from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc} from "firebase/firestore";
+import { getFirestore, doc } from 'firebase/firestore';
 
 const FirebaseConfig = {
-        apiKey: "AIzaSyBVqRKOI2We73lechMuww1dXd5YOiBDFko",
-        authDomain: "marvel-quiz-34f3c.firebaseapp.com",
-        projectId: "marvel-quiz-34f3c",
-        storageBucket: "marvel-quiz-34f3c.appspot.com",
-        messagingSenderId: "42555013387",
-        appId: "1:42555013387:web:ca5b748b9ed11ee9eaca0e"
-      };
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+};
 
 // Initialize Firebase
 const app = initializeApp(FirebaseConfig);
 
 // Initialize & export Authorization + Cloud Firestore (database)
 export const db = getFirestore(app);
-export const user = uid => doc(db, `users/${uid}`);
-
+export const user = (uid) => doc(db, `users/${uid}`);
 
 export const auth = getAuth(app);

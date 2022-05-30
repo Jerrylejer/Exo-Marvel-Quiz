@@ -1,18 +1,16 @@
-import { findByLabelText } from '@testing-library/react';
 import React from 'react';
 import batman from '../../images/batman.png';
 
 const Page404 = () => {
-
     // Exemple de inline-styles
     const h2Render = {
-        textAlign: 'center'
-    }
+        textAlign: 'center',
+    };
 
     const image = {
         width: '40rem',
-        margin: "40px auto"
-    }
+        margin: '40px auto',
+    };
 
     return (
         <div className='quiz-bg'>
